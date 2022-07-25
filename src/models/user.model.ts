@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     deposit: { type: Number, required: true },
     role: { type: Number, required: true },
+    token: { type: String },
   },
   {
     timestamps: true,

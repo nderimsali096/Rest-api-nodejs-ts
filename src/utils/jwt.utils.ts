@@ -1,3 +1,0 @@
-function signJwt() {}
-
-function verifyJwt() {}
