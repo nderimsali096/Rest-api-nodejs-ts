@@ -77,6 +77,14 @@ export async function login(body: any) {
   throw new Error("Invalid credentials");
 }
 
+export async function addOrResetDeposit(payload: any) {
+  return User.findOneAndUpdate(
+    { _id: payload.userId },
+    { $set: { deposit: payload.deposit } },
+    { upsert: true, new: true }
+  );
+}
+
 export async function validatePassword({
   username,
   password,

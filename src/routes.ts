@@ -13,6 +13,8 @@ import {
   getUserHandler,
   deleteUserHandler,
   getAllUsersHandler,
+  depositHandler,
+  resetDepositHandler,
 } from "./controllers/user.controller";
 import validate from "./middlewares/validateResource";
 import { createUserSchema } from "./schemas/user.schema";
@@ -23,27 +25,29 @@ import {
   deleteProductSchema,
 } from "./schemas/product.schema";
 
-import auth from "./middlewares/checkAuth";
+import { verifyToken as authentication } from "./middlewares/checkAuth";
 
 function routes(app: Express) {
   // USER ROUTES
   app.post("/api/users", validate(createUserSchema), createUserHandler);
   app.post("/api/users/login", loginUserHandler);
-  app.put("/api/users/:userId", auth, updateUserHandler);
-  app.get("/api/users/:userId", auth, getUserHandler);
-  app.delete("/api/users/:userId", auth, deleteUserHandler);
+  app.put("/api/users/:userId", authentication, updateUserHandler);
+  app.get("/api/users/:userId", authentication, getUserHandler);
+  app.delete("/api/users/:userId", authentication, deleteUserHandler);
   app.get("/api/users", getAllUsersHandler);
+  app.patch("/api/users/deposit", authentication, depositHandler);
+  app.patch("/api/users/reset", authentication, resetDepositHandler);
 
   // PRODUCT ROUTES
   app.post(
     "/api/products",
-    [auth, validate(createProductSchema)],
+    [authentication, validate(createProductSchema)],
     createProductHandler
   );
 
   app.put(
     "/api/products/:productId",
-    [auth, validate(updateProductSchema)],
+    [authentication, validate(updateProductSchema)],
     updateProductHandler
   );
 
@@ -57,7 +61,7 @@ function routes(app: Express) {
 
   app.delete(
     "/api/products/:productId",
-    [auth, validate(deleteProductSchema)],
+    [authentication, validate(deleteProductSchema)],
     deleteProductHandler
   );
 }

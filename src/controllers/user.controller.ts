@@ -7,8 +7,10 @@ import {
   findUser,
   deleteUser,
   getAllUsers,
+  addOrResetDeposit,
 } from "../services/user.service";
 import { CreateUserInput } from "../types/types";
+import { checkDepositCoin } from "../utils/helpers";
 import logger from "../utils/logger";
 
 export async function createUserHandler(
@@ -87,5 +89,60 @@ export async function loginUserHandler(req: Request, res: Response) {
   } catch (error: any) {
     logger.error(`Could not log in: ${error}`);
     return res.status(401).send(error.message);
+  }
+}
+
+export async function depositHandler(req: Request, res: Response) {
+  try {
+    const userId = req.user.user_id;
+    const user = await findUser(userId);
+    if (!user) return res.sendStatus(404);
+
+    // Check user role
+    if (user.role === 1)
+      return res.status(401).send(`You need to be a "buyer" role to deposit.`);
+
+    // Check coin value
+    if (!checkDepositCoin(req.body.deposit))
+      return res
+        .status(400)
+        .send("Deposit coin can be only in values: 5, 10, 20, 50, 100");
+
+    const addedDeposit = user.deposit + req.body.deposit;
+    const payload = {
+      userId: userId,
+      deposit: addedDeposit,
+    };
+
+    const updatedUser = await addOrResetDeposit(payload);
+    return res.json(updatedUser);
+  } catch (error: any) {
+    logger.error(`Could not deposit: ${error}`);
+    return res.status(500).send(error.message);
+  }
+}
+
+export async function resetDepositHandler(req: Request, res: Response) {
+  try {
+    const userId = req.user.user_id;
+    const user = await findUser(userId);
+    if (!user) return res.sendStatus(404);
+
+    // Check user role
+    if (user.role === 1)
+      return res
+        .status(401)
+        .send(`You need to be a "buyer" role to reset deposit.`);
+
+    const payload = {
+      userId: userId,
+      deposit: 0,
+    };
+
+    const updatedUser = await addOrResetDeposit(payload);
+    return res.json(updatedUser);
+  } catch (error: any) {
+    logger.error(`Could not deposit: ${error}`);
+    return res.status(500).send(error.message);
   }
 }
