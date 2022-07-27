@@ -35,7 +35,7 @@ function routes(app: Express) {
   app.post("/api/users", validate(createUserSchema), createUserHandler);
 
   //? Login
-  app.post("/api/users/login", authentication, loginUserHandler);
+  app.post("/api/users/login", loginUserHandler);
 
   //? Update user
   app.put("/api/users/:userId", authentication, updateUserHandler);

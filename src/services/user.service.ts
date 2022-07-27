@@ -18,10 +18,10 @@ export async function createUser(
 ) {
   try {
     const user = await User.create(input);
-    const publicKey = config.get<string>("secretKey");
+    const secretKey = config.get<string>("secretKey");
     const token = jwt.sign(
       { userId: user._id, username: user.username },
-      publicKey,
+      secretKey,
       {
         expiresIn: "2h",
       }
@@ -69,12 +69,12 @@ export async function login(body: any) {
   };
   const user = await validatePassword(obj);
 
-  const publicKey = config.get<string>("secretKey");
+  const secretKey = config.get<string>("secretKey");
 
   if (user) {
     const token = jwt.sign(
       { user_id: user._id, username: user.username },
-      publicKey,
+      secretKey,
       {
         expiresIn: "2h",
       }
@@ -82,7 +82,7 @@ export async function login(body: any) {
     user.token = token;
     return user;
   }
-  throw new Error("Invalid credentials");
+  return "Invalid credentials";
 }
 
 export async function addOrBuyOrResetDeposit(payload: any) {

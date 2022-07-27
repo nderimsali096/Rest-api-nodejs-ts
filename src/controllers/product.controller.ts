@@ -6,94 +6,80 @@ import {
   findProduct,
   getAllProducts,
 } from "../services/product.service";
-import logger from "../utils/logger";
 
 export async function createProductHandler(req: Request | any, res: Response) {
-  try {
-    const userId = req.user.user_id;
-    const body = req.body;
-    body.userId = userId;
-    const product = await createProduct({
-      ...body,
-    });
-    return res.status(201).send(product);
-  } catch (error: any) {
-    logger.error(`Could not create product: ${error}`);
-    return res.status(409).send(error.message);
-  }
+  const userId = req.user.user_id;
+  const body = req.body;
+  if (userId) body.userId = userId;
+
+  // Check if cost is divisible by 5
+  if (req.body.cost % 5 !== 0)
+    return res.status(400).send("Cost should be divisible by 5");
+
+  const product = await createProduct({
+    ...body,
+  });
+  return res.status(201).send(product);
 }
 
 export async function updateProductHandler(req: Request | any, res: Response) {
-  try {
-    const productId = req.params.productId;
-    const userId = req.user.user_id;
-    const update = req.body;
-    const product = await findProduct(productId);
+  const productId = req.params.productId;
+  let userId = req.user.user_id;
+  if (!userId) userId = req.body.userId;
+  const update = req.body;
+  const product = await findProduct(productId);
 
-    // Check if product exists
-    if (!product) return res.status(404).send("Product does not exist");
+  // Check if product exists
+  if (!product) return res.status(404).send("Product does not exist");
 
-    // Check if the user that is trying to update the product is the one who created it
-    if (product.userId.toString() !== userId)
-      return res
-        .status(403)
-        .send("You need to be the product's creator in order to update it");
+  // Check if cost is divisible by 5
+  if (req.body.cost % 5 !== 0)
+    return res.status(400).send("Cost should be divisible by 5");
 
-    const updatedProduct = await findAndUpdateProduct({ productId }, update, {
-      new: true,
-    });
-    return res.send(updatedProduct);
-  } catch (error: any) {
-    logger.error(`Could not update product: ${error}`);
-    return res.status(409).send(error.message);
-  }
+  // Check if the user that is trying to update the product is the one who created it
+  if (product.userId.toString() !== userId)
+    return res
+      .status(403)
+      .send("You need to be the product's creator in order to update it");
+
+  const updatedProduct = await findAndUpdateProduct({ productId }, update, {
+    new: true,
+  });
+  return res.status(201).send(updatedProduct);
 }
 
 export async function getProductHandler(req: Request, res: Response) {
-  try {
-    const productId = req.params.productId;
-    const product = await findProduct(productId);
+  const productId = req.params.productId;
+  const product = await findProduct(productId);
 
-    // Check if product exists
-    if (!product) return res.status(404).send("Product does not exist");
+  // Check if product exists
+  if (!product) return res.status(404).send("Product does not exist");
 
-    return res.send(product);
-  } catch (error: any) {
-    logger.error(`Could not get the product: ${error}`);
-    return res.status(409).send(error.message);
-  }
+  return res.send(product);
 }
 
 export async function getAllProductsHandler(req: Request, res: Response) {
-  try {
-    const products = await getAllProducts();
-    return res.json({
-      products: products.map((product) => product.toObject({ getters: true })),
-    });
-  } catch (error: any) {
-    return res.status(409).send(error.message);
-  }
+  const products = await getAllProducts();
+  return res.json({
+    products: products.map((product) => product.toObject({ getters: true })),
+  });
 }
 
 export async function deleteProductHandler(req: Request | any, res: Response) {
-  try {
-    const productId = req.params.productId;
-    const userId = req.user.user_id;
-    const product = await findProduct(productId);
+  const productId = req.params.productId;
+  let userId = req.user.user_id;
+  if (!userId) userId = req.body.userId;
+  const product = await findProduct(productId);
 
-    // Check if product exists
-    if (!product) return res.status(404).send("Product does not exist");
+  // Check if product exists
+  if (!product) return res.status(404).send("Product does not exist");
 
-    // Check if the user that is trying to delete the product is the one who created it
-    if (product.userId.toString() !== userId)
-      return res
-        .status(403)
-        .send("You need to be the product's creator in order to delete it");
+  // Check if the user that is trying to delete the product is the one who created it
+  if (product.userId.toString() !== userId)
+    return res
+      .status(403)
+      .send("You need to be the product's creator in order to delete it");
 
-    await deleteProduct(productId);
-    return res.status(204).send("Product was deleted successfully");
-  } catch (error: any) {
-    logger.error(`Could not get the product: ${error}`);
-    return res.status(409).send(error.message);
-  }
+  await deleteProduct(productId);
+  return res.status(204).send("Product was deleted successfully");
 }

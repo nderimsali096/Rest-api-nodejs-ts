@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import config from "config";
 import bcrypt from "bcrypt";
-import { Role } from "../types/enums";
 import { UserDocument } from "../types/interfaces";
 
 const userSchema = new mongoose.Schema(
@@ -18,7 +17,7 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.pre("save", async function (next) {
-  let user = this as UserDocument;
+  let user: any;
 
   if (!user.isModified("password")) {
     return next();

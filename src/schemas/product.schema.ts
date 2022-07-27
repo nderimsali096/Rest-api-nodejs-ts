@@ -5,7 +5,7 @@ const payload = {
     amountAvailable: number(),
     cost: number({
       required_error: "Cost is required",
-    }).multipleOf(5, "Cost should be a value multiple of 5"),
+    }),
     productName: string({
       required_error: "Name is required",
     }),

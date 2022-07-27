@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { Role } from "./enums";
 
 export interface UserDocument extends mongoose.Document {
   username: string;

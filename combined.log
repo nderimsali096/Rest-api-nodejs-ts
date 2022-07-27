@@ -1,0 +1,2 @@
+{"level":"info","message":"App is running at http://localhost:1337","service":"user-service"}
+{"level":"info","message":"Successfully connected to DB","service":"user-service"}

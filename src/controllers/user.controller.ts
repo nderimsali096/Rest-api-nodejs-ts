@@ -87,26 +87,25 @@ export async function deleteUserHandler(req: Request, res: Response) {
 }
 
 export async function loginUserHandler(req: Request | any, res: Response) {
-  try {
-    const user = await login(req.body);
+  const response = await login(req.body);
 
-    // Check if user exists
-    if (!user) return res.status(404).send("User does not exsit");
+  // Check for Invalid credentials
+  if (response === "Invalid credentials")
+    return res.status(401).send("Invalid credentials.");
 
-    // Check if user is already logged in so we can pass a message
-    let msg = "";
-    if (req.userActive)
-      msg = "There is already an active session using your account";
+  // Check if user exists
+  if (!response) return res.status(404).send("User does not exist");
 
-    return res.json({
-      username: user.username,
-      token: user.token,
-      msg: msg,
-    });
-  } catch (error: any) {
-    logger.error(`Could not log in: ${error}`);
-    return res.status(401).send(error.message);
-  }
+  // Check if user is already logged in so we can pass a message
+  let msg = "";
+  if (req.userActive)
+    msg = "There is already an active session using your account";
+
+  return res.json({
+    username: response.username,
+    token: response.token,
+    msg: msg,
+  });
 }
 
 export async function depositHandler(req: Request | any, res: Response) {
@@ -156,6 +155,10 @@ export async function buyHandler(req: Request | any, res: Response) {
     // Check if product exists
     const product = await findProduct(req.body.productId);
     if (!product) return res.status(404).send("Could not find product");
+
+    // Check if there is enough products available
+    if (req.body.amount > product.amountAvailable)
+      return res.status(400).send("There are not enough availableAmount");
 
     // Check if user has enough money on the account to make the purchase
     const allCost = req.body.amount * product.cost;

@@ -8,24 +8,20 @@ export const verifyToken = (
   next: NextFunction
 ) => {
   // Check if the request has BEARER token
-  if (!req.headers.authorization && req.originalUrl !== "/api/users/login")
+  if (!req.headers.authorization)
     return res
-      .status(401)
+      .status(403)
       .send("There is no bearer token attached to the request");
 
   const token = req.headers.authorization.split(" ")[1];
-  const publicKey = config.get<string>("secretKey");
+  const secretKey = config.get<string>("secretKey");
 
   // Check if the token is valid
   if (!token) {
     return res.status(403).send("A valid token is required for authentication");
   }
   try {
-    const decoded: string | JwtPayload | any = jwt.verify(token, publicKey);
-
-    // If user is already logged in we save a property so we can use it later
-    if (decoded.username === req.body.username) req.userActive = true;
-
+    const decoded: string | JwtPayload | any = jwt.verify(token, secretKey);
     req.user = decoded;
   } catch (err: any) {
     return res.status(401).send(err);

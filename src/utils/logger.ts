@@ -1,13 +1,9 @@
-import logger from 'pino';
+import { createLogger, format, transports } from "winston";
+const { combine } = format;
 
-
-const log = logger({
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        colorize: true
-      }
-    }
-  })
+const log = createLogger({
+  format: combine(format.colorize(), format.simple()),
+  transports: [new transports.Console()],
+});
 
 export default log;
