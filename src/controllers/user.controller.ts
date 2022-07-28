@@ -23,10 +23,10 @@ export async function updateUserHandler(req: Request, res: Response) {
   const userId = req.params.userId;
 
   // Check if user exists
-  const user = findUser(userId);
+  const user = await findUser(userId);
   if (!user) return res.status(404).send("Could not find user");
 
-  const updatedUser = await findAndUpdateUser({ userId }, update, {
+  const updatedUser = await findAndUpdateUser(userId, update, {
     new: true,
   });
   return res.status(202).send(updatedUser);

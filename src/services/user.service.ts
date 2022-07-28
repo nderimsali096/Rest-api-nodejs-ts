@@ -42,19 +42,17 @@ export async function findUser(
   options: QueryOptions = { lean: true }
 ) {
   const user = await User.findOne({ _id: userId });
-  if (!user) throw new Error("Could not find user");
+  if (!user) return null;
   return omit(user, "password");
 }
 
 export async function findAndUpdateUser(
-  query: FilterQuery<UserDocument>,
-  update: UpdateQuery<
-    Omit<UserDocument, "token" | "createdAt" | "updatedAt" | "comparePassword">
-  >,
+  userId: String,
+  body: any,
   options: QueryOptions
 ) {
-  const user = await User.findOneAndUpdate(query, update, options);
-  if (!user) throw new Error("Could not find user");
+  const user = await User.findByIdAndUpdate(userId, body, options);
+  if (!user) return null;
   return omit(user.toJSON(), "password");
 }
 
@@ -86,11 +84,12 @@ export async function login(body: any) {
 }
 
 export async function addOrBuyOrResetDeposit(payload: any) {
-  return User.findOneAndUpdate(
+  const user = await User.findOneAndUpdate(
     { _id: payload.userId },
     { $set: { deposit: payload.deposit } },
     { upsert: true, new: true }
   );
+  return omit(user.toJSON(), "password");
 }
 
 export async function validatePassword({
