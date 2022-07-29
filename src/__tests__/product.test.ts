@@ -299,8 +299,7 @@ describe("product", () => {
         // Act
         const { statusCode, text } = await supertest(app)
           .delete(`/api/products/${InvalidProductId}`)
-          .set("Authorization", `Bearer ${token}`)
-          .send(payload);
+          .set("Authorization", `Bearer ${token}`);
 
         // Assert
         expect(statusCode).toBe(404);

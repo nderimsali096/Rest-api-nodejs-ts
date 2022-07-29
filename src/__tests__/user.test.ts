@@ -267,8 +267,6 @@ describe("user", () => {
         userPayload.productId = product._id;
         userPayload.deposit = 10;
 
-        console.log(userPayload);
-
         // Act
         const { text, statusCode } = await supertest(app)
           .patch(`/api/users/buy`)
