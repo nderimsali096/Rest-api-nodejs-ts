@@ -7,10 +7,21 @@ import {
   getAllProducts,
 } from "../services/product.service";
 
+import { findUser } from "../services/user.service";
+
 export async function createProductHandler(req: Request | any, res: Response) {
   const userId = req.user.user_id;
   const body = req.body;
   if (userId) body.userId = userId;
+
+  const user = await findUser(userId);
+
+  if (!user) return res.status(404).send("User not found");
+
+  console.log(user);
+
+  if (user.role === 1)
+    return res.status(403).send("You need to be a seller to create product");
 
   // Check if cost is divisible by 5
   if (req.body.cost % 5 !== 0)
